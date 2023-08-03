@@ -1,7 +1,7 @@
  const express = require("express");
  const coursesRouter = express.Router();
  const connection = require("../../server/server.js");
-
+const check = require('../../middleware/checkParamsMiddleware.js')
 // Ottieni tutti i corsi
 coursesRouter.get("/", (req, res) => {
   const query = "SELECT * FROM courses";
@@ -19,9 +19,10 @@ coursesRouter.get("/", (req, res) => {
 });
 
 // Aggiungi un nuovo corso
-coursesRouter.post("/:course_name/:fk_typology", (req, res) => {
+coursesRouter.post("/:course_name/:fk_typology",check, (req, res) => {
     const course_name = req.params.course_name;
     //int check
+
     const fk_typology =req.params.fk_typology
   const insertQuery = "INSERT INTO courses (course_name, fk_typology) VALUES (?,?)";
 
@@ -37,7 +38,7 @@ coursesRouter.post("/:course_name/:fk_typology", (req, res) => {
 });
 
 // // Modifica un corso esistente
-coursesRouter.put("/:course_id/:course_name/:fk_typology", (req, res) => {
+coursesRouter.put("/:course_id/:course_name/:fk_typology",check("course_id","course_name","fk_typology"), (req, res) => {
   const  course_id  = req.params.course_id;
   const course_name=req.params.course_name;
   const fk_typology=req.params.fk_typology;
@@ -57,7 +58,7 @@ coursesRouter.put("/:course_id/:course_name/:fk_typology", (req, res) => {
 });
 
 // // Cancella un corso
-coursesRouter.delete("/:course_id", (req, res) => {
+coursesRouter.delete("/:course_id",check, (req, res) => {
   const  course_id  = req.params.course_id;
   const deleteQuery = `DELETE FROM courses WHERE courses_id = ?`;
 

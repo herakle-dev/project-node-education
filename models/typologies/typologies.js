@@ -3,7 +3,7 @@ const typologiesRouter = express.Router();
 const connection = require("../../server/server.js");
 
 // get all from typology
-typologiesRouter.get("/api/typology", (req, res) => {
+typologiesRouter.get("/", (req, res) => {
   const query = "SELECT * FROM typology";
   connection.query(query, (err, results, fields) => {
     if (err) {
@@ -17,7 +17,7 @@ typologiesRouter.get("/api/typology", (req, res) => {
 });
 
 // add new typology from url
-typologiesRouter.post("/api/typology/:typology_name", (req, res) => {
+typologiesRouter.post("/:typology_name", (req, res) => {
   const typology_name = req.params.typology_name;
   const newTypologyQuery = "INSERT INTO typology (name_typology) VALUES (?)";
   connection.query(newTypologyQuery, [typology_name], (err, results) => {
@@ -31,7 +31,7 @@ typologiesRouter.post("/api/typology/:typology_name", (req, res) => {
 });
 
 // delete
-typologiesRouter.delete("/api/typology/:typology_id", (req, res) => {
+typologiesRouter.delete("/:typology_id", (req, res) => {
   const typology_id = req.params.typology_id;
 
   const typology_name_query = "SELECT name_typology FROM typology WHERE typology_id = ?";
@@ -62,7 +62,7 @@ typologiesRouter.delete("/api/typology/:typology_id", (req, res) => {
 });
 
 // update typology_name
-typologiesRouter.put("/api/typology/:typology_id/:new_typology_name", (req, res) => {
+typologiesRouter.put("/:typology_id/:new_typology_name", (req, res) => {
   const typology_id = req.params.typology_id;
   const new_typology_name = req.params.new_typology_name;
 

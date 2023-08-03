@@ -7,7 +7,7 @@ const coursesRouter= require('./models/courses/courses')
 const app =express()
 
 app.use('/api/courses', coursesRouter); 
-app.use('/', typologiesRouter);
+app.use('/api/typology', typologiesRouter);
 app.listen(3006, () => {
 });
 
