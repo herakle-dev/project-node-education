@@ -1,10 +1,8 @@
+// connection.js
 const mysql = require('mysql2');
+const config = require('./config');
 
-const connection = mysql.createConnection({
-  user: 'root',
-  password: '',
-  database: 'node_education',
-});
+const connection = mysql.createConnection(config);
 
 connection.connect((err) => {
   if (err) {
@@ -13,6 +11,5 @@ connection.connect((err) => {
   }
   console.log('Connessione al database avvenuta con successo!');
 });
-
 
 module.exports = connection;
