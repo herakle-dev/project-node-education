@@ -3,14 +3,14 @@ const coursesRouter = express.Router();
 const connection = require("../../server/server.js");
 const idCheck = require("../../middleware/idCheckAsNum.js");
 const stringCheck = require("../../middleware/stringParamCheck.js");
+const { sendErrorByStatusCode } = require("../../function/errorHandling.js");
 
 // get all courses  method GET at api/courses
 coursesRouter.get("/", (req, res) => {
   const query = "SELECT * FROM courses";
   connection.query(query, (err, results, fields) => {
     if (err) {
-      console.error("Errore nell'esecuzione della query:", err);
-      res.status(500).json({ error: "Errore nel server" });
+      sendErrorByStatusCode(res,500)
       return;
     }
     res.status(200).json(results);
@@ -27,11 +27,13 @@ coursesRouter.get(
 
     connection.query(query, fk_typology, (err, results) => {
       if (err) {
-        console.error("Errore nell'esecuzione della query:", err);
-        res.status(500).json({ error: "Errore nel server" });
+        sendErrorByStatusCode(res,500)
         return;
       }
-
+      if (results.length === 0) {
+        sendErrorByStatusCode(res, 404, "Tipologia non trovata");
+        return;
+      }
       res.status(200).json(results);
     });
   }
@@ -43,8 +45,12 @@ coursesRouter.get("/:course_id", idCheck("course_id"), (req, res) => {
   const singleGetQuery = "SELECT * FROM courses where courses_id= ?";
   connection.query(singleGetQuery, course_id, (err, results, fields) => {
     if (err) {
-      console.error("Errore nell'esecuzione della query:", err);
-      res.status(500).json({ error: "Errore nel server" });
+      sendErrorByStatusCode(res,500)
+
+      return;
+    }
+    if (results.length === 0) {
+      sendErrorByStatusCode(res, 404, "Corso non trovato");
       return;
     }
     res.status(200).json(results);
@@ -68,14 +74,11 @@ coursesRouter.post(
       [course_name, fk_typology],
       (err, results, fields) => {
         if (err) {
-          console.error(
-            "Errore nell'esecuzione della query di inserimento:",
-            err
-          );
-
-          res.status(500).json({ error: "Errore nel server" });
+          sendErrorByStatusCode(res,500)
+    
           return;
         }
+    
         res.json(`Corso inserito con successo : ${course_name} `);
       }
     );
@@ -89,21 +92,19 @@ coursesRouter.put("/:courses_id", idCheck("courses_id"), (req, res) => {
   const { new_name, new_typology } = req.query;
 
   if (!new_name && !new_typology) {
-    return res.status(400).json({ error: "Nessun dato da aggiornare" });
+  return  sendErrorByStatusCode(res, 400, "Nessun dato da aggiornare")
   }
 
   const findQuery = `SELECT * FROM courses WHERE courses_id = ?`;
   connection.query(findQuery, courses_id, (err, results) => {
     if (err) {
-      console.error("Errore nell'esecuzione della query di ricerca:", err);
-      res.status(500).json({ error: "Errore nel server" });
+     sendErrorByStatusCode(res,500)
       return;
     }
 
     if (results.length === 0) {
-      res
-        .status(404)
-        .json({ error: `Il corso con ID ${courses_id} non esiste` });
+      sendErrorByStatusCode(res, 404, `Il corso con ID ${courses_id} non esiste` )
+   
       return;
     }
 
@@ -123,12 +124,10 @@ coursesRouter.put("/:courses_id", idCheck("courses_id"), (req, res) => {
       [updateData, courses_id],
       (err, results, fields) => {
         if (err) {
-          console.error("Errore nell'esecuzione della query di modifica:", err);
-          res.status(500).json({ error: "Errore nel server" });
+          sendErrorByStatusCode(res,500)
           return;
         }
-
-        res.json(`Corso con ID ${courses_id} modificato con successo.`);
+sendErrorByStatusCode(res, 200,`Corso con ID ${courses_id} modificato con successo.` )
       }
     );
   });
@@ -142,15 +141,12 @@ coursesRouter.delete("/:course_id", idCheck("course_id"), (req, res) => {
 
   connection.query(findQuery, course_id, (err, results) => {
     if (err) {
-      console.error("Errore nell'esecuzione della query di ricerca:", err);
-      res.status(500).json({ error: "Errore nel server" });
+sendErrorByStatusCode(res,500)
       return;
     }
 
     if (results.length === 0) {
-      res
-        .status(404)
-        .json({ error: `Il corso con ID ${course_id} non esiste` });
+    sendErrorByStatusCode(res,404,`Il corso con ID ${course_id} non esiste` )
       return;
     }
 
@@ -158,15 +154,10 @@ coursesRouter.delete("/:course_id", idCheck("course_id"), (req, res) => {
 
     connection.query(deleteQuery, course_id, (err, results, fields) => {
       if (err) {
-        console.error(
-          "Errore nell'esecuzione della query di cancellazione:",
-          err
-        );
-        res.status(500).json({ error: "Errore nel server" });
+    sendErrorByStatusCode(res,500)
         return;
       }
-
-      res.json(`Corso n° ${course_id} cancellato con successo!`);
+sendErrorByStatusCode(res,200,`Corso n° ${course_id} cancellato con successo!`)
     });
   });
 });

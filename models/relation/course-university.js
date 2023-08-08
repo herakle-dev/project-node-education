@@ -3,6 +3,7 @@ const course_universityRouter = express.Router();
 const connection = require("../../server/server.js");
 const idCheck = require("../../middleware/idCheckAsNum.js");
 const stringCheck = require("../../middleware/stringParamCheck.js");
+const { sendErrorByStatusCode } = require("../../function/errorHandling.js");
 
 
 //get all relations course/university with useful info with inner join,  method get at api/relation
@@ -15,8 +16,11 @@ course_universityRouter.get("/", (req, res) => {
     INNER join typology on courses.fk_typology = typology.typology_id;`;
   connection.query(getAllRelationsQuery, (err, response) => {
     if (err) {
-      console.error("Errore nell'esecuzione della query:", err);
-      res.status(500).json({ error: "Errore nel server" });
+      sendErrorByStatusCode(res, 500);
+      return;
+    }
+    if (results.length === 0) {
+      sendErrorByStatusCode(res, 404);
       return;
     }
 
@@ -61,8 +65,11 @@ course_universityRouter.get('/search', (req, res) => {
 
   connection.query(getAllRelationsQuery, parameterArray, (err, response) => {
     if (err) {
-      console.error("Errore nell'esecuzione della query:", err);
-      res.status(500).json({ error: "Errore nel server" });
+  sendErrorByStatusCode(res,500)
+      return;
+    }
+    if (response.affectedRows === 0) {
+      sendErrorByStatusCode(res,404,"La ricerca non ha prodotto nessun risultato.")
       return;
     }
     res.json(response);
@@ -79,13 +86,11 @@ course_universityRouter.post("", (req, res) => {
     [courses_id, university_id],
     (err, results) => {
       if (err) {
-        console.error("Errore nell'esecuzione della query:", err);
-        res.status(500).json({ error: "Errore nel server" });
+      sendErrorByStatusCode(res,500)
         return;
       }
-      res.json(
-        `Hai aggiunto una relazione tra il corso n° ${courses_id} e l'università n° ${university_id}`
-      );
+      sendErrorByStatusCode(res,200, `Hai aggiunto una relazione tra il corso n° ${courses_id} e l'università n° ${university_id}`)
+ 
     }
   );
 });
@@ -96,32 +101,27 @@ course_universityRouter.put("/:relation_id", idCheck('relation_id'), (req, res) 
   const university_id = req.query.university_id;
 
   if (!university_id && !courses_id) {
-    return res.status(400).json({ error: "Nessun dato da aggiornare" });
+    sendErrorByStatusCode(res,400,"Nessun dato da aggiornare")
+    return 
   }
   const findCourseQuery = `SELECT * FROM courses WHERE courses_id = ?`;
   connection.query(findCourseQuery, courses_id, (err, results) => {
     if (err) {
-      console.error("Errore nell'esecuzione della query di ricerca:", err);
-      res.status(500).json({ error: "Errore nel server" });
+    sendErrorByStatusCode(res,500)
       return;
     }
     if (results.length === 0) {
-      res
-        .status(404)
-        .json({ error: `Il corso con ID ${courses_id} non esiste` });
+      sendErrorByStatusCode(res,404, `Il corso con ID ${courses_id} non esiste`)
       return;
     }
     const findUniversityQuery = `SELECT * FROM university WHERE university_id = ?`;
     connection.query(findUniversityQuery, university_id, (err, results) => {
       if (err) {
-        console.error("Errore nell'esecuzione della query di ricerca:", err);
-        res.status(500).json({ error: "Errore nel server" });
+     sendErrorByStatusCode(res,500)
         return;
       }
       if (results.length === 0) {
-        res
-          .status(404)
-          .json({ error: `L'università con ID ${university_id} non esiste` });
+   sendErrorByStatusCode(res,404,`L'università con ID ${university_id} non esiste`)
         return;
       }
       updateRelationQuery =
@@ -131,20 +131,17 @@ course_universityRouter.put("/:relation_id", idCheck('relation_id'), (req, res) 
         [courses_id, university_id, relation_id],
         (err, results) => {
           if (err) {
-            console.error("Errore nell'esecuzione della query:", err);
-            res.status(500).json({ error: "Errore nel server" });
+          sendErrorByStatusCode(res,500)
             return;
           }
 
           if (results.affectedRows === 0) {
-            res
-              .status(404)
-              .json({ error: "La relazione specificata non esiste" });
+            sendErrorByStatusCode(res,404,"La relazione specificata non esiste")
             return;
           }
-          res.json(
-            `Hai aggiornato la relazione tra il corso n° ${courses_id} e l'università n° ${university_id}`
-          );
+
+          sendErrorByStatusCode(res,200, `Hai aggiornato la relazione tra il corso n° ${courses_id} e l'università n° ${university_id}` )
+      
         }
       );
     });

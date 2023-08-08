@@ -3,6 +3,7 @@ const typologiesRouter = express.Router();
 const connection = require("../../server/server.js");
 const idCheck = require('../../middleware/idCheckAsNum.js')
 const stringCheck = require('../../middleware/stringParamCheck.js')
+const { sendErrorByStatusCode } = require("../../function/errorHandling.js");
 
 // get all from typology method get at api/typology
 typologiesRouter.get("/",
@@ -10,8 +11,7 @@ typologiesRouter.get("/",
   const query = "SELECT * FROM typology";
   connection.query(query, (err, results) => {
     if (err) {
-      console.error("Errore nell'esecuzione della query:", err);
-      res.status(500).json({ error: "Errore nel server" });
+   sendErrorByStatusCode(res,500)
       return;
     }
       res.status(200).json(results);;
@@ -24,8 +24,11 @@ idCheck("typology_id"),(req,res)=>{
  const singleGetQuery = `Select * from typology where typology_id = ?`
  connection.query(singleGetQuery,typology_id,(err, results)=>{
 if(err){
-  console.error("Errore durante la richiesta della tipologia ", err);
-  res.status(500).json({ error: "Errore nel server" });
+sendErrorByStatusCode(res,500)
+  return;
+}
+if (results.length === 0) {
+  sendErrorByStatusCode(res, 404);
   return;
 }
 
@@ -42,11 +45,10 @@ stringCheck("typology_name"), (req, res) => {
   const newTypologyQuery = "INSERT INTO typology (typology_name) VALUES (?)";
   connection.query(newTypologyQuery, [typology_name], (err, results) => {
     if (err) {
-      console.error("Errore nell'esecuzione della query:", err);
-      res.status(500).json({ error: "Errore nel server" });
+  sendErrorByStatusCode(res,500)
       return;
     }
-    res.json(`Tipologia aggiunta correttamente: ${typology_name}`);
+    sendErrorByStatusCode(res,200, `Tipologia aggiunta correttamente: ${typology_name}`)
   });
 });
 
@@ -57,25 +59,23 @@ idCheck("typology_id"), (req, res) => {
   const typology_name_query = "SELECT typology_name FROM typology WHERE typology_id = ?";
   connection.query(typology_name_query, [typology_id], (err, selectResult) => {
     if (err) {
-      console.error("Errore nell'esecuzione della query di selezione:", err);
-      res.status(500).json({ error: "Errore nel server" });
+    sendErrorByStatusCode(res,500)
       return;
     }
 
     if (selectResult.length === 0) {
-      res.status(404).json({ error: "Tipologia non trovata" });
-      return;
+sendErrorByStatusCode(res,404, "Tipologia non trovata") 
+     return;
     }
 
     const typology_name = selectResult[0].typology_name;
     const deleteTypology = "DELETE FROM typology WHERE typology_id = ?";
     connection.query(deleteTypology, [typology_id], (err, deleteResult) => {
       if (err) {
-        console.error("Errore nell'esecuzione della query di eliminazione:", err);
-        res.status(500).json({ error: "Errore nel server" });
+sendErrorByStatusCode(res,500)
         return;
       }
-      res.json(`Tipologia eliminata correttamente: ${typology_name}`);
+      sendErrorByStatusCode(res,200,`Tipologia eliminata correttamente: ${typology_name}`)
     });
   });
 });
@@ -89,32 +89,29 @@ typologiesRouter.put("/:typology_id",
   const typology_name_query = "SELECT * FROM typology WHERE typology_id = ?";
   connection.query(typology_name_query, [typology_id], (err, selectResult) => {
     if (err) {
-      console.error("Errore nell'esecuzione della query di selezione:", err);
-      res.status(500).json({ error: "Errore nel server" });
+  sendErrorByStatusCode(res,500)
       return;
     }
 
     if (selectResult.length === 0) {
       // Tipologia non trovata
-      res.status(404).json({ error: `Tipologia n° ${typology_id}, non trovata.` });
+     sendErrorByStatusCode(res,404,`Tipologia n° ${typology_id}, non trovata.` )
       return;
     }
 
     if (!new_typology_name) {
       // Nessun nuovo nome specificato nei query parameters
-      res.status(400).json({ error: "Nuovo nome della tipologia mancante nei query parameters ricorda che l'url deve essere /id?new_name=nuovo_valore" });
+sendErrorByStatusCode(res,400, "Nuovo nome della tipologia mancante nei query parameters ricorda che l'url deve essere /id?new_name=nuovo_valore")
       return;
     }
 
     const query = "UPDATE typology SET typology_name = ? WHERE typology_id = ?";
     connection.query(query, [new_typology_name, typology_id], (err, results) => {
       if (err) {
-        console.error("Errore nell'esecuzione della query di aggiornamento:", err);
-        res.status(500).json({ error: "Errore nel server" });
+       sendErrorByStatusCode(res,500)
         return;
       }
-
-      res.json(`Tipologia modificata con successo: ${new_typology_name}`);
+sendErrorByStatusCode(res,200,`Tipologia modificata con successo: ${new_typology_name}`)
     });
   });
 });

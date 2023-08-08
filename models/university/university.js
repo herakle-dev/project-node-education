@@ -3,6 +3,7 @@ const universityRouter = express.Router();
 const connection = require("../../server/server.js");
 const idCheck = require("../../middleware/idCheckAsNum.js");
 const stringCheck = require("../../middleware/stringParamCheck.js");
+const { sendErrorByStatusCode } = require("../../function/errorHandling.js");
 
 //GET all from university method get at api/university
 universityRouter.get("/",
@@ -10,8 +11,11 @@ universityRouter.get("/",
   const query = "select * from university";
   connection.query(query, (err, results) => {
     if (err) {
-      console.error("Errore nell'esecuzione della query:", err);
-      res.status(500).json({ error: "Errore nel server" });
+      sendErrorByStatusCode(res, 500);
+      return;
+    }
+    if (results.length === 0) {
+      sendErrorByStatusCode(res, 404);
       return;
     }
       res.status(200).json(results);;
@@ -26,8 +30,11 @@ universityRouter.get("/:university_id",
     const singleUniQuery = "select * from university where university_id = ?";
     connection.query(singleUniQuery, university_id, (err, results) => {
       if (err) {
-        console.error("Errore nell'esecuzione della query:", err);
-        res.status(500).json({ error: "Errore nel server" });
+        sendErrorByStatusCode(res, 500);
+        return;
+      }
+      if (results.length === 0) {
+        sendErrorByStatusCode(res, 404, "Università non trovata");
         return;
       }
         res.status(200).json(results);;
@@ -50,13 +57,12 @@ universityRouter.post("/:university_city/:university_name/",
       [university_city, university_name],
       (err, results) => {
         if (err) {
-          console.error("Errore nell'esecuzione della query:", err);
-          res.status(500).json({ error: "Errore nel server" });
+          sendErrorByStatusCode(res, 500);
           return;
         }
-
+  
         res.json(
-          `Hai aggiunto una nuova università che si trova : ${university_city}, con nome ${university_name}`
+          `Hai aggiunto ${university_name} come università e come città: ${university_city}.`
         );
       }
     );
@@ -71,19 +77,20 @@ idCheck('university_id'),
   const { new_name, new_city } = req.query;
 
   if (!new_name && !new_city) {
-    return res.status(400).json({ error: "Nessun dato da aggiornare" });
+     return sendErrorByStatusCode(res, 400,'Nessun dato da aggiornare')
+
   }
 
   const findQuery = `SELECT * FROM university WHERE university_id = ?`;
   connection.query(findQuery, university_id, (err, results) => {
     if (err) {
-      console.error("Errore nell'esecuzione della query di ricerca:", err);
-      res.status(500).json({ error: "Errore nel server" });
+ sendErrorByStatusCode(res,500)
       return;
     }
 
     if (results.length === 0) {
-      res.status(404).json({ error: `Il corso con ID ${university_id} non esiste` });
+      sendErrorByStatusCode(res, 404,  `Il corso con ID ${university_id} non esiste` )
+    
       return;
     }
  
@@ -104,11 +111,9 @@ idCheck('university_id'),
     [updateData, university_id],
     (err, results, fields) => {
       if (err) {
-        console.error("Errore nell'esecuzione della query di modifica:", err);
-        res.status(500).json({ error: "Errore nel server" });
+        sendErrorByStatusCode(res,500,"Errore nell'esecuzione della query di modifica:")
         return;
       }
-
         res.status(200).json(results);;
     }
   );
@@ -122,13 +127,12 @@ universityRouter.delete('/:university_id',
   const university_name_query = "SELECT university_name FROM university WHERE university_id = ?";
   connection.query(university_name_query, [university_id], (err, selectResult) => {
     if (err) {
-      console.error("Errore nell'esecuzione della query di selezione:", err);
-      res.status(500).json({ error: "Errore nel server" });
+   sendErrorByStatusCode(res,500,"Errore nella cancellazione dell'università ")
       return;
     }
 
     if (selectResult.length === 0) {
-      res.status(404).json({ error: "Università non trovata" });
+      sendErrorByStatusCode(res,404,"Università non trovata" )
       return;
     }
 
@@ -136,11 +140,10 @@ universityRouter.delete('/:university_id',
     const deleteUniversityQuery = "DELETE FROM university WHERE university_id = ?";
     connection.query(deleteUniversityQuery, [university_id], (err, deleteResult) => {
       if (err) {
-        console.error("Errore nell'esecuzione della query di eliminazione:", err);
-        res.status(500).json({ error: "Errore nel server" });
+        sendErrorByStatusCode(res,500, "Errore nell'esecuzione della query di eliminazione" )
         return;
       }
-      res.json(`Università eliminata correttamente: ${university_name}`);
+     sendErrorByStatusCode(res,200,`Università eliminata correttamente: ${university_name}`)
     });
   });
 })
