@@ -3,39 +3,42 @@ const coursesRouter = express.Router();
 const connection = require("../../server/server.js");
 const idCheck = require("../../middleware/idCheckAsNum.js");
 const stringCheck = require("../../middleware/stringParamCheck.js");
-// Ottieni tutti i corsi
-coursesRouter.get("/",
- (req, res) => {
-  const query = "SELECT * FROM courses";
 
+// get all courses  method GET at api/courses
+coursesRouter.get("/", (req, res) => {
+  const query = "SELECT * FROM courses";
   connection.query(query, (err, results, fields) => {
     if (err) {
       console.error("Errore nell'esecuzione della query:", err);
       res.status(500).json({ error: "Errore nel server" });
       return;
     }
-
-    res.json(results);
+    res.status(200).json(results);
   });
 });
-// filter courses by typology id (foreign key)
-coursesRouter.get('/typology/:fk_typology', idCheck('fk_typology'), (req, res) => {
-  const fk_typology = req.params.fk_typology;
-  const query = 'SELECT * FROM courses WHERE fk_typology = ?';
 
-  connection.query(query, fk_typology, (err, results) => {
-    if (err) {
-      console.error('Errore nell\'esecuzione della query:', err);
-      res.status(500).json({ error: 'Errore nel server' });
-      return;
-    }
+// search courses by typology id (foreign key) method get at api/courses/typology/TYPOLOGY_ID_MUST_EXIST
+coursesRouter.get(
+  "/typology/:fk_typology",
+  idCheck("fk_typology"),
+  (req, res) => {
+    const fk_typology = req.params.fk_typology;
+    const query = "SELECT * FROM courses WHERE fk_typology = ?";
 
-    res.json(results);
-  });
-});
-//single courses get
-coursesRouter.get("/:course_id",
- idCheck("course_id"), (req, res) => {
+    connection.query(query, fk_typology, (err, results) => {
+      if (err) {
+        console.error("Errore nell'esecuzione della query:", err);
+        res.status(500).json({ error: "Errore nel server" });
+        return;
+      }
+
+      res.status(200).json(results);
+    });
+  }
+);
+
+//single courses get method GET at api/courses/ID_MUST_EXIST
+coursesRouter.get("/:course_id", idCheck("course_id"), (req, res) => {
   const course_id = req.params.course_id;
   const singleGetQuery = "SELECT * FROM courses where courses_id= ?";
   connection.query(singleGetQuery, course_id, (err, results, fields) => {
@@ -44,11 +47,13 @@ coursesRouter.get("/:course_id",
       res.status(500).json({ error: "Errore nel server" });
       return;
     }
-    res.json(results);
+    res.status(200).json(results);
   });
 });
-// add new course
-coursesRouter.post("/:course_name/:fk_typology",
+
+// add new course method POST at api/courses/INSERT_COURSE_NAME/INSERT_TYPOLOGY_ID(MUST_EXIST)
+coursesRouter.post(
+  "/:course_name/:fk_typology",
   stringCheck("course_name"),
   idCheck("fk_typology"),
   (req, res) => {
@@ -76,9 +81,10 @@ coursesRouter.post("/:course_name/:fk_typology",
     );
   }
 );
-//  modify course name & typology with query parameter by id
-coursesRouter.put("/:courses_id", idCheck("courses_id"),
- (req, res) => {
+
+/*                        modify course name & typology 
+method PUT at api/courses/ID_MUST_EXIST?new_name=INSERT_NEW_COURSE_NAME&new_typology=INSERT_NEW_TYPOLOGY_ID(MUST_EXIST) */
+coursesRouter.put("/:courses_id", idCheck("courses_id"), (req, res) => {
   const courses_id = req.params.courses_id;
   const { new_name, new_typology } = req.query;
 
@@ -95,7 +101,9 @@ coursesRouter.put("/:courses_id", idCheck("courses_id"),
     }
 
     if (results.length === 0) {
-      res.status(404).json({ error: `Il corso con ID ${courses_id} non esiste` });
+      res
+        .status(404)
+        .json({ error: `Il corso con ID ${courses_id} non esiste` });
       return;
     }
 
@@ -110,20 +118,24 @@ coursesRouter.put("/:courses_id", idCheck("courses_id"),
 
     const updateQuery = "UPDATE courses SET ? WHERE courses_id = ?";
 
-    connection.query(updateQuery, [updateData, courses_id], (err, results, fields) => {
-      if (err) {
-        console.error("Errore nell'esecuzione della query di modifica:", err);
-        res.status(500).json({ error: "Errore nel server" });
-        return;
-      }
+    connection.query(
+      updateQuery,
+      [updateData, courses_id],
+      (err, results, fields) => {
+        if (err) {
+          console.error("Errore nell'esecuzione della query di modifica:", err);
+          res.status(500).json({ error: "Errore nel server" });
+          return;
+        }
 
-      res.json(`Corso con ID ${courses_id} modificato con successo.`);
-    });
+        res.json(`Corso con ID ${courses_id} modificato con successo.`);
+      }
+    );
   });
 });
-//  course delete for id
-coursesRouter.delete("/:course_id",
- idCheck("course_id"), (req, res) => {
+
+//  course delete for id method DELETE at api/courses/ID_MUST_EXIST
+coursesRouter.delete("/:course_id", idCheck("course_id"), (req, res) => {
   const course_id = req.params.course_id;
 
   const findQuery = `SELECT * FROM courses WHERE courses_id = ?`;

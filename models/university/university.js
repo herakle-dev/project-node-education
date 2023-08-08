@@ -3,7 +3,8 @@ const universityRouter = express.Router();
 const connection = require("../../server/server.js");
 const idCheck = require("../../middleware/idCheckAsNum.js");
 const stringCheck = require("../../middleware/stringParamCheck.js");
-//get all from university
+
+//GET all from university method get at api/university
 universityRouter.get("/",
  (req, res) => {
   const query = "select * from university";
@@ -13,10 +14,11 @@ universityRouter.get("/",
       res.status(500).json({ error: "Errore nel server" });
       return;
     }
-    res.json(results);
+      res.status(200).json(results);;
   });
 });
-//single get by id from university
+
+//single get by id from university method GET at api/university/MUST_EXIST_ID
 universityRouter.get("/:university_id",
   idCheck("university_id"),
   (req, res) => {
@@ -28,11 +30,12 @@ universityRouter.get("/:university_id",
         res.status(500).json({ error: "Errore nel server" });
         return;
       }
-      res.json(results);
+        res.status(200).json(results);;
     });
   }
 );
-//add new university with query param new_city& new_name
+
+//add new university method POST at : api/university/UNIVERSITY_CITY/UNIVERSITY_NAME
 universityRouter.post("/:university_city/:university_name/",
   stringCheck("university_city"),
   stringCheck("university_name"),
@@ -59,7 +62,8 @@ universityRouter.post("/:university_city/:university_name/",
     );
   }
 );
-//update university
+
+//modify university by id method PUT  at : api/university/ID_MUST_EXIST?new_name=INSERT_NEW_NAME&new_city=INSERT_NEW_CITY
 universityRouter.put("/:university_id",
 idCheck('university_id'),
  (req, res) => {
@@ -69,6 +73,20 @@ idCheck('university_id'),
   if (!new_name && !new_city) {
     return res.status(400).json({ error: "Nessun dato da aggiornare" });
   }
+
+  const findQuery = `SELECT * FROM university WHERE university_id = ?`;
+  connection.query(findQuery, university_id, (err, results) => {
+    if (err) {
+      console.error("Errore nell'esecuzione della query di ricerca:", err);
+      res.status(500).json({ error: "Errore nel server" });
+      return;
+    }
+
+    if (results.length === 0) {
+      res.status(404).json({ error: `Il corso con ID ${university_id} non esiste` });
+      return;
+    }
+ 
 
   const updateData = {};
   if (new_name) {
@@ -91,12 +109,12 @@ idCheck('university_id'),
         return;
       }
 
-      res.json(results);
+        res.status(200).json(results);;
     }
   );
-});
+});});
 
-//delete university
+//delete university by id method DELETE at api/university/ID_MUST_EXIST
 universityRouter.delete('/:university_id',
  idCheck('university_id'),
  (req,res)=>{
@@ -110,7 +128,6 @@ universityRouter.delete('/:university_id',
     }
 
     if (selectResult.length === 0) {
-      // Tipologia non trovata
       res.status(404).json({ error: "Università non trovata" });
       return;
     }

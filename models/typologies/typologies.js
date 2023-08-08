@@ -4,7 +4,7 @@ const connection = require("../../server/server.js");
 const idCheck = require('../../middleware/idCheckAsNum.js')
 const stringCheck = require('../../middleware/stringParamCheck.js')
 
-// get all from typology
+// get all from typology method get at api/typology
 typologiesRouter.get("/",
  (req, res) => {
   const query = "SELECT * FROM typology";
@@ -14,10 +14,10 @@ typologiesRouter.get("/",
       res.status(500).json({ error: "Errore nel server" });
       return;
     }
-    res.json(results);
+      res.status(200).json(results);;
   });
 });
-//single typo get 
+//single typology get by existing id method get at  api/typology/EXISTING_ID
 typologiesRouter.get("/:typology_id",
 idCheck("typology_id"),(req,res)=>{
  const typology_id= req.params.typology_id
@@ -30,11 +30,12 @@ if(err){
 }
 
 
-res.json(results);
+  res.status(200).json(response);;
  })
 
 })
-// add new typology from url
+
+// add new typology from url : method post at api/typology/NEW_TYPOLOGY_NAME
 typologiesRouter.post("/:typology_name",
 stringCheck("typology_name"), (req, res) => {
   const typology_name = req.params.typology_name;
@@ -48,11 +49,11 @@ stringCheck("typology_name"), (req, res) => {
     res.json(`Tipologia aggiunta correttamente: ${typology_name}`);
   });
 });
-// delete
+
+// delete typology by existing id : method delete at api/typology/EXISTING_TYPOLOGY_ID
 typologiesRouter.delete("/:typology_id",
 idCheck("typology_id"), (req, res) => {
   const typology_id = req.params.typology_id;
-
   const typology_name_query = "SELECT typology_name FROM typology WHERE typology_id = ?";
   connection.query(typology_name_query, [typology_id], (err, selectResult) => {
     if (err) {
@@ -62,7 +63,6 @@ idCheck("typology_id"), (req, res) => {
     }
 
     if (selectResult.length === 0) {
-      // Tipologia non trovata
       res.status(404).json({ error: "Tipologia non trovata" });
       return;
     }
@@ -79,7 +79,8 @@ idCheck("typology_id"), (req, res) => {
     });
   });
 });
-// update typology_name
+
+// update typology_name from existing id : method put at api/typology?new_typology_name=INSERT_NEW_NAME
 typologiesRouter.put("/:typology_id",
  idCheck("typology_id"), (req, res) => {
   const typology_id = req.params.typology_id;
@@ -117,7 +118,5 @@ typologiesRouter.put("/:typology_id",
     });
   });
 });
-
-
 
 module.exports = typologiesRouter;
