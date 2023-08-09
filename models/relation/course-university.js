@@ -2,7 +2,6 @@ const express = require("express");
 const course_universityRouter = express.Router();
 const connection = require("../../server/server.js");
 const idCheck = require("../../middleware/idCheckAsNum.js");
-const stringCheck = require("../../middleware/stringParamCheck.js");
 const { sendErrorByStatusCode } = require("../../function/errorHandling.js");
 
 

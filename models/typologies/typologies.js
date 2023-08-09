@@ -33,7 +33,7 @@ if (results.length === 0) {
 }
 
 
-  res.status(200).json(response);;
+  res.status(200).json(results);;
  })
 
 })
