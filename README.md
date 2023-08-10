@@ -125,5 +125,4 @@ node index.js
     - course_id: Specify the updated course ID (must exist).
     - university_id: Specify the updated university ID (must exist).
 # Screenshot
-- Test screenshot
-  ![](Screenshot/test.png)
+  ![ Test screenshot](Screenshot/test.png)
