@@ -80,7 +80,7 @@ sendErrorByStatusCode(res,500)
   });
 });
 
-// update typology_name from existing id : method put at api/typology?new_typology_name=INSERT_NEW_NAME
+// update typology_name from existing id : method put at api/typology/typology_id?new_typology_name=INSERT_NEW_NAME
 typologiesRouter.put("/:typology_id",
  idCheck("typology_id"), (req, res) => {
   const typology_id = req.params.typology_id;

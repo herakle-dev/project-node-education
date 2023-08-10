@@ -21,7 +21,6 @@ universityRouter.get("/",
       res.status(200).json(results);;
   });
 });
-
 //single get by id from university method GET at api/university/MUST_EXIST_ID
 universityRouter.get("/:university_id",
   idCheck("university_id"),
@@ -41,7 +40,6 @@ universityRouter.get("/:university_id",
     });
   }
 );
-
 //add new university method POST at : api/university/UNIVERSITY_CITY/UNIVERSITY_NAME
 universityRouter.post("/:university_city/:university_name/",
   stringCheck("university_city"),
@@ -66,7 +64,6 @@ universityRouter.post("/:university_city/:university_name/",
     );
   }
 );
-
 //modify university by id method PUT  at : api/university/ID_MUST_EXIST?new_name=INSERT_NEW_NAME&new_city=INSERT_NEW_CITY
 universityRouter.put("/:university_id",
 idCheck('university_id'),
