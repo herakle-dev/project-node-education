@@ -53,6 +53,7 @@ coursesRouter.get("/:course_id", idCheck("course_id"), (req, res) => {
       sendErrorByStatusCode(res, 404, "Corso non trovato");
       return;
     }
+    
     res.status(200).json(results);
   });
 });
@@ -78,8 +79,7 @@ coursesRouter.post(
     
           return;
         }
-    
-        res.json(`Corso inserito con successo : ${course_name} `);
+    sendErrorByStatusCode(res, 200,`Corso inserito con successo : ${course_name}`)
       }
     );
   }

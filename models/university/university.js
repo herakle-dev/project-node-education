@@ -60,10 +60,8 @@ universityRouter.post("/:university_city/:university_name/",
           sendErrorByStatusCode(res, 500);
           return;
         }
-  
-        res.json(
-          `Hai aggiunto ${university_name} come università e come città: ${university_city}.`
-        );
+  sendErrorByStatusCode(res,200,`Hai aggiunto ${university_name} come università e come città: ${university_city}.` )
+      
       }
     );
   }
@@ -89,7 +87,7 @@ idCheck('university_id'),
     }
 
     if (results.length === 0) {
-      sendErrorByStatusCode(res, 404,  `Il corso con ID ${university_id} non esiste` )
+      sendErrorByStatusCode(res, 404,  `L'università con ID ${university_id} non esiste` )
     
       return;
     }
@@ -114,7 +112,7 @@ idCheck('university_id'),
         sendErrorByStatusCode(res,500,"Errore nell'esecuzione della query di modifica:")
         return;
       }
-        res.status(200).json(results);;
+      sendErrorByStatusCode(res,200, `Universita aggiornata correttamente con : ${new_name},${new_city}`)
     }
   );
 });});

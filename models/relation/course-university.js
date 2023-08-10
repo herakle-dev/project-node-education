@@ -18,7 +18,7 @@ course_universityRouter.get("/", (req, res) => {
       sendErrorByStatusCode(res, 500);
       return;
     }
-    if (results.length === 0) {
+    if (response.length === 0) {
       sendErrorByStatusCode(res, 404);
       return;
     }
@@ -71,11 +71,11 @@ course_universityRouter.get('/search', (req, res) => {
       sendErrorByStatusCode(res,404,"La ricerca non ha prodotto nessun risultato.")
       return;
     }
-    res.json(response);
+    res.status(200).json(response);
   });
 });
 // post relations URL?course_id=MUST_EXIST_VALUE&university_id=MUST_EXIST_VALUE
-course_universityRouter.post("", (req, res) => {
+course_universityRouter.post("/", (req, res) => {
   const courses_id = req.query.course_id;
   const university_id = req.query.university_id;
   addRelationQuery =

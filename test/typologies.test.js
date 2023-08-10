@@ -1,42 +1,46 @@
 const sinon = require('sinon');
 const express = require('express');
 const request = require('supertest');
-const { expect } = require('chai'); // Importa la funzione expect da chai
-const typologiesRouter = require('../models/typologies/typologies'); // Assicurati di impostare il percorso corretto
+const { expect } = require('chai'); 
+const typologiesRouter = require('../models/typologies/typologies'); 
 const connection = require('../server/server.js');
 
 describe('Typologies Router', () => {
-  let connectionStub; // Dichiarazione del mock di connessione
+  let connectionStub; 
   let app;
 
   beforeEach(() => {
-    connectionStub = sinon.stub(connection, 'query'); // Usa sinon.stub su connection.query direttamente
+    connectionStub = sinon.stub(connection, 'query'); 
     app = express();
     app.use('/api/typology', typologiesRouter);
   });
 
   afterEach(() => {
-    connectionStub.restore(); // Ripristina lo stato originale del mock di connessione
+    connectionStub.restore(); 
   });
 
   it('should handle GET /api/typology', async () => {
-    // Configura il comportamento desiderato per la query
-    connectionStub.yields(null, [{ id: 1, name: 'Typology 1' }]);
+    connectionStub.yields(null, [
+      { typology_id: 1, typology_name: 'Typology 1' },
+      { typology_id: 2, typology_name: 'Typology 2' },
+      { typology_id: 3, typology_name: 'Typology 3' }]);
 
     const response = await request(app).get('/api/typology');
 
     expect(response.status).to.equal(200);
-    expect(response.body).to.deep.equal([{ id: 1, name: 'Typology 1' }]);
+    expect(response.body).to.deep.equal([  
+      { typology_id: 1, typology_name: 'Typology 1' },
+    { typology_id: 2, typology_name: 'Typology 2' },
+    { typology_id: 3, typology_name: 'Typology 3' }]);
   });
 
-  it('should handle GET /api/typology/:typology_id', async () => {
-    // Configura il comportamento desiderato per la query
-    connectionStub.yields(null, [{ id: 2, name: 'Typology 2' }]);
+  it('should handle single typology GET by id /api/typology/:typology_id', async () => {
+    connectionStub.yields(null, [{ typology_id: 2, typology_name: 'Typology 2' }]);
 
     const response = await request(app).get('/api/typology/2');
 
     expect(response.status).to.equal(200);
-    expect(response.body).to.deep.equal([{ id: 2, name: 'Typology 2' }]);
+    expect(response.body).to.deep.equal([{ typology_id: 2, typology_name: 'Typology 2' }]);
   });
   it('should handle POST /api/typology/:typology_name', async () => {
     const typology_name = 'New Typology';
@@ -71,7 +75,6 @@ describe('Typologies Router', () => {
     const response = await request(app)
       .put(`/api/typology/${typology_id}`)
       .query({ new_name: new_typology_name });
-
     expect(response.status).to.equal(200);
     expect(response.body.message).to.equal(`Tipologia modificata con successo: ${new_typology_name}`);
   });
